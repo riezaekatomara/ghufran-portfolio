@@ -1,61 +1,97 @@
 "use client";
 
 import Link from "next/link";
-import DarkModeToggle from "./DarkModeToggle";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
-    <nav className="w-full border-b border-border bg-background sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-4">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+      <nav className="container mx-auto flex items-center justify-between py-4 px-4">
         {/* Logo */}
-        <Link href="/" className="font-bold text-xl text-primary">
+        <Link href="/" className="text-xl font-bold text-primary">
           Ghufran Travel
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-6">
-          <Link href="/paket" className="hover:text-primary transition">
-            Paket
-          </Link>
-          <Link href="/daftar" className="hover:text-primary transition">
-            Daftar
-          </Link>
-          <DarkModeToggle />
-        </div>
+        <ul className="hidden md:flex gap-6 text-sm font-medium">
+          <li>
+            <Link href="/" className="hover:text-primary transition-colors">
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/paket"
+              className="hover:text-primary transition-colors"
+            >
+              Paket
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/daftar"
+              className="hover:text-primary transition-colors"
+            >
+              Daftar
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/kontak"
+              className="hover:text-primary transition-colors"
+            >
+              Kontak
+            </Link>
+          </li>
+        </ul>
 
-        {/* Mobile Button */}
+        {/* Mobile Menu Button */}
         <button
-          className="md:hidden p-2 rounded-lg border border-border"
-          onClick={() => setOpen(!open)}
+          onClick={toggleMenu}
+          className="md:hidden p-2 rounded-lg hover:bg-muted transition"
         >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
-      </div>
+      </nav>
 
-      {/* Mobile Menu */}
-      {open && (
-        <div className="md:hidden flex flex-col gap-4 px-6 py-4 border-t border-border bg-background">
+      {/* Mobile Dropdown Menu */}
+      {isOpen && (
+        <div className="md:hidden bg-background border-t border-border px-4 py-4 space-y-3">
+          <Link
+            href="/"
+            className="block hover:text-primary transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            Home
+          </Link>
           <Link
             href="/paket"
-            className="hover:text-primary transition"
-            onClick={() => setOpen(false)}
+            className="block hover:text-primary transition-colors"
+            onClick={() => setIsOpen(false)}
           >
             Paket
           </Link>
           <Link
             href="/daftar"
-            className="hover:text-primary transition"
-            onClick={() => setOpen(false)}
+            className="block hover:text-primary transition-colors"
+            onClick={() => setIsOpen(false)}
           >
             Daftar
           </Link>
-          <DarkModeToggle />
+          <Link
+            href="/kontak"
+            className="block hover:text-primary transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            Kontak
+          </Link>
         </div>
       )}
-    </nav>
+    </header>
   );
 }
