@@ -1,13 +1,13 @@
 export type Paket = {
   id: string;
   nama: string;
-  harga: string | string[]; // kalau ada Quad/Triple/Double
+  harga: string | string[];
   durasi: string;
   maskapai: string | string[];
   tanggal: string[];
   landing?: string | string[];
-  gambar?: string; // URL gambar poster
-  kategori?: string; // contoh: Silver, Premium
+  gambar?: string;
+  kategori?: string;
 };
 
 export const paketList: Paket[] = [
@@ -20,7 +20,7 @@ export const paketList: Paket[] = [
     maskapai: "Oman Air",
     tanggal: ["04 September 2025"],
     landing: "Madinah",
-    gambar: "/paket/september-hematpol.jpg",
+    gambar: "/paket/september.jpg",
   },
   {
     id: "sep-seru1",
@@ -30,7 +30,7 @@ export const paketList: Paket[] = [
     maskapai: "Qatar Airways",
     tanggal: ["06 September 2025"],
     landing: "Jeddah",
-    gambar: "/paket/september-seru1.jpg",
+    gambar: "/paket/september.jpg",
   },
   {
     id: "sep-seru2",
@@ -40,7 +40,7 @@ export const paketList: Paket[] = [
     maskapai: "Qatar Airways",
     tanggal: ["21 September 2025"],
     landing: "Thaif",
-    gambar: "/paket/september-seru2.jpg",
+    gambar: "/paket/september.jpg",
   },
 
   // ===== OKTOBER 2025 =====
@@ -52,7 +52,7 @@ export const paketList: Paket[] = [
     maskapai: ["Qatar Airways", "Oman Air"],
     tanggal: ["06 Oktober 2025", "23 Oktober 2025"],
     landing: ["Jeddah", "Madinah"],
-    gambar: "/paket/oktober-nyaman.jpg",
+    gambar: "/paket/oktober.jpg",
   },
   {
     id: "okt-tenang",
@@ -62,7 +62,7 @@ export const paketList: Paket[] = [
     maskapai: ["Qatar Airways", "Oman Air"],
     tanggal: ["17 Oktober 2025", "23 Oktober 2025"],
     landing: ["Jeddah", "Madinah"],
-    gambar: "/paket/oktober-tenang.jpg",
+    gambar: "/paket/oktober.jpg",
   },
   {
     id: "okt-manis",
@@ -72,7 +72,7 @@ export const paketList: Paket[] = [
     maskapai: "Qatar Airways",
     tanggal: ["09 Oktober 2025"],
     landing: "Jeddah",
-    gambar: "/paket/oktober-manis.jpg",
+    gambar: "/paket/oktober-manis-bonus-berlapis-qatar.jpg",
   },
 
   // ===== NOVEMBER 2025 =====
@@ -84,7 +84,7 @@ export const paketList: Paket[] = [
     maskapai: "Qatar Airways",
     tanggal: ["01 November 2025", "23 November 2025"],
     landing: "Jeddah",
-    gambar: "/paket/november-hematpol.jpg",
+    gambar: "/paket/november.jpg",
   },
   {
     id: "nov-bahagia",
@@ -94,7 +94,7 @@ export const paketList: Paket[] = [
     maskapai: "Qatar Airways",
     tanggal: ["01 November 2025", "21 November 2025", "23 November 2025"],
     landing: "Jeddah",
-    gambar: "/paket/november-bahagia.jpg",
+    gambar: "/paket/november.jpg",
   },
 
   // ===== DESEMBER 2025 =====
@@ -106,7 +106,7 @@ export const paketList: Paket[] = [
     maskapai: ["Qatar Airways", "Saudia"],
     tanggal: ["01 Desember 2025", "25 Desember 2025"],
     landing: ["Madinah", "Jeddah"],
-    gambar: "/paket/desember-millenial.jpg",
+    gambar: "/paket/desember.jpg",
   },
   {
     id: "des-asyik",
@@ -116,7 +116,7 @@ export const paketList: Paket[] = [
     maskapai: ["Qatar Airways", "Saudia"],
     tanggal: ["01 Desember 2025", "25 Desember 2025"],
     landing: ["Madinah", "Jeddah"],
-    gambar: "/paket/desember-asyik.jpg",
+    gambar: "/paket/desember.jpg",
   },
   {
     id: "des-akhir-tahun",
@@ -133,6 +133,6 @@ export const paketList: Paket[] = [
     maskapai: "Saudia",
     tanggal: ["25 Desember 2025"],
     landing: "Jeddah",
-    gambar: "/paket/desember-akhir-tahun.jpg",
+    gambar: "/paket/desember-akhir-tahun-thaif-al-ula.jpg",
   },
 ];
