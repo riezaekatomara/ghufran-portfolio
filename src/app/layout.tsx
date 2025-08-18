@@ -1,25 +1,28 @@
+// src/app/layout.tsx
+"use client";
+
 import "./globals.css";
-import type { Metadata } from "next";
-import { ThemeProvider } from "./providers";
-import Navbar from "@/components/Navbar";
+import { ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Ghufran Travel",
-  description: "Umroh Berkesan bersama Ghufran Travel",
-};
+export default function RootLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id">
       <body>
-        <ThemeProvider>
-          <Navbar />
-          <main className="min-h-screen">{children}</main>
-        </ThemeProvider>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={pathname} // unik tiap halaman
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </body>
     </html>
   );

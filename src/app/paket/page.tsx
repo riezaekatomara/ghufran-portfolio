@@ -1,6 +1,8 @@
-// src/app/paket/page.tsx
+import { notFound } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 
+// tipe data paket
 type Paket = {
   slug: string;
   nama: string;
@@ -13,6 +15,7 @@ type Paket = {
   sumber: string;
 };
 
+// daftar paket yang sama dengan app/page.tsx
 const paketList: Paket[] = [
   {
     slug: "umrah-plus-al-ula-thaif",
@@ -26,8 +29,8 @@ const paketList: Paket[] = [
     sumber: "https://ghufrantravel.com/transaksi/paket-umrah",
   },
   {
-    slug: "umrah-hemat-pol",
-    nama: "Umrah Hemat Pol",
+    slug: "umrah-hemat",
+    nama: "Umrah Hemat",
     jadwal: ["Beberapa tanggal 2025–2026"],
     hotMakkah: "Grand Al Massa",
     hotMadinah: "Anshorul Madinah",
@@ -36,6 +39,61 @@ const paketList: Paket[] = [
     sumber:
       "https://ghufrantravel.com/transaksi/paket-umrah/detail/190/umrah-hemat-pol",
   },
+  {
+    slug: "umrah-ramadhan",
+    nama: "Umrah Ramadhan",
+    jadwal: ["Maret 2026"],
+    hotMakkah: "Setaraf Bintang 5",
+    hotMadinah: "Setaraf Bintang 5",
+    airlines: ["Saudia", "Qatar Airways"],
+    bandara: "CGK – Soekarno-Hatta",
+    hargaMulai: 45000000,
+    sumber: "https://ghufrantravel.com/transaksi/paket-umrah",
+  },
+  {
+    slug: "umrah-akhir-tahun",
+    nama: "Umrah Akhir Tahun",
+    jadwal: ["Des 2025"],
+    hotMakkah: "Swissotel Makkah",
+    hotMadinah: "Anwar Al Madinah Movenpick",
+    airlines: ["Garuda Indonesia"],
+    bandara: "CGK – Soekarno-Hatta",
+    hargaMulai: 36000000,
+    sumber: "https://ghufrantravel.com/transaksi/paket-umrah",
+  },
+  {
+    slug: "umrah-liburan-sekolah",
+    nama: "Umrah Liburan Sekolah",
+    jadwal: ["Juni 2026"],
+    hotMakkah: "Royal Dar Al Eiman",
+    hotMadinah: "Rawdat Al Aqeeq",
+    airlines: ["Emirates"],
+    bandara: "CGK – Soekarno-Hatta",
+    hargaMulai: 33500000,
+    sumber: "https://ghufrantravel.com/transaksi/paket-umrah",
+  },
+  {
+    slug: "umrah-vvip",
+    nama: "Umrah VVIP / Premium",
+    jadwal: ["Custom Request"],
+    hotMakkah: "Fairmont Makkah",
+    hotMadinah: "Madinah Oberoi",
+    airlines: ["Qatar Airways", "Emirates"],
+    bandara: "CGK – Soekarno-Hatta",
+    hargaMulai: 70000000,
+    sumber: "https://ghufrantravel.com/transaksi/paket-umrah",
+  },
+  {
+    slug: "umrah-haji-khusus",
+    nama: "Haji Khusus / Plus",
+    jadwal: ["2026 – Kuota Terbatas"],
+    hotMakkah: "Pullman ZamZam",
+    hotMadinah: "Shaza Madinah",
+    airlines: ["Saudia"],
+    bandara: "CGK – Soekarno-Hatta",
+    hargaMulai: 120000000,
+    sumber: "https://ghufrantravel.com/transaksi/paket-umrah",
+  },
 ];
 
 function formatIDR(n?: number) {
@@ -43,45 +101,62 @@ function formatIDR(n?: number) {
   return n.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
 }
 
-export default function PaketList() {
+export default function PaketDetail({ params }: { params: { slug: string } }) {
+  const paket = paketList.find((p) => p.slug === params.slug);
+
+  if (!paket) {
+    notFound();
+  }
+
   return (
-    <main className="container mx-auto px-4 py-12">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6">Semua Paket Umrah</h1>
+    <main className="min-h-dvh container mx-auto px-4 py-12">
+      <Link href="/" className="text-sm underline">
+        ← Kembali
+      </Link>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {paketList.map((p) => (
-          <article
-            key={p.slug}
-            className="rounded-2xl border p-5 shadow-sm bg-card"
+      <div className="mt-6 rounded-xl border p-6 bg-card shadow-md">
+        {/* gambar sesuai slug */}
+        <Image
+          src={`/paket/${paket.slug}.jpg`}
+          alt={paket.nama}
+          width={800}
+          height={450}
+          className="rounded-lg object-cover w-full h-72"
+        />
+
+        <h1 className="text-2xl md:text-3xl font-semibold mt-4">
+          {paket.nama}
+        </h1>
+        <p className="mt-2 text-base text-muted-foreground">
+          Jadwal Keberangkatan: {paket.jadwal.join(", ")}
+        </p>
+
+        <ul className="mt-4 space-y-1 text-sm">
+          <li>Hotel Makkah: {paket.hotMakkah}</li>
+          <li>Hotel Madinah: {paket.hotMadinah}</li>
+          <li>Maskapai: {paket.airlines.join(", ")}</li>
+          <li>Bandara Keberangkatan: {paket.bandara}</li>
+        </ul>
+
+        <p className="text-lg font-medium mt-4">
+          Harga Mulai: {formatIDR(paket.hargaMulai)}
+        </p>
+
+        <div className="mt-6 flex gap-3">
+          <Link
+            href={`/daftar?paket=${paket.slug}`}
+            className="px-5 py-2 rounded-lg bg-primary text-primary-foreground"
           >
-            <h3 className="text-lg font-semibold">{p.nama}</h3>
-            <p className="text-sm mt-1">Jadwal: {p.jadwal.join(", ")}</p>
-            <p className="text-sm mt-1">
-              Hotel: {p.hotMakkah} • {p.hotMadinah}
-            </p>
-            <p className="text-sm mt-1">Maskapai: {p.airlines.join(", ")}</p>
-            <p className="text-sm mt-1">Bandara: {p.bandara}</p>
-            <p className="text-base font-medium mt-2">
-              {formatIDR(p.hargaMulai)}
-            </p>
-
-            <div className="mt-4 flex gap-2">
-              <Link
-                href={`/paket/${p.slug}`}
-                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground"
-              >
-                Lihat Detail
-              </Link>
-              <a
-                href={p.sumber}
-                target="_blank"
-                className="px-4 py-2 rounded-xl border"
-              >
-                Sumber Resmi
-              </a>
-            </div>
-          </article>
-        ))}
+            Daftar Sekarang
+          </Link>
+          <a
+            href={paket.sumber}
+            target="_blank"
+            className="px-5 py-2 rounded-lg border"
+          >
+            Sumber Resmi
+          </a>
+        </div>
       </div>
     </main>
   );
