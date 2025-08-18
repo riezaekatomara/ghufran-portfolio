@@ -2,51 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-
-type Paket = {
-  slug: string;
-  nama: string;
-  jadwal: string[];
-  hotMakkah: string;
-  hotMadinah: string;
-  airlines: string[];
-  bandara: string;
-  hargaMulai?: number;
-  sumber: string;
-  gambar?: string;
-};
-
-const paketList: Paket[] = [
-  {
-    slug: "umrah-plus-al-ula-thaif",
-    nama: "Umrah Plus Al Ula & Thaif",
-    jadwal: ["06 Sep 2025", "21 Sep 2025", "06 Okt 2025"],
-    hotMakkah: "Royal Majestic / setaraf",
-    hotMadinah: "Sanabel / Le Meridien (setaraf)",
-    airlines: ["Qatar Airways", "Oman Air"],
-    bandara: "CGK – Soekarno-Hatta",
-    hargaMulai: 30500000,
-    sumber: "https://ghufrantravel.com/transaksi/paket-umrah",
-    gambar: "/paket/umrah-plus-al-ula-thaif.jpg",
-  },
-  {
-    slug: "umrah-hemat-pol",
-    nama: "Umrah Hemat Pol",
-    jadwal: ["Beberapa tanggal 2025–2026"],
-    hotMakkah: "Grand Al Massa",
-    hotMadinah: "Anshorul Madinah",
-    airlines: ["Emirates", "Qatar Airways"],
-    bandara: "CGK – Soekarno-Hatta",
-    sumber:
-      "https://ghufrantravel.com/transaksi/paket-umrah/detail/190/umrah-hemat-pol",
-    gambar: "/paket/umrah-hemat-pol.jpg",
-  },
-];
-
-function formatIDR(n?: number) {
-  if (!n) return "Hubungi untuk harga terbaru";
-  return n.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
-}
+import { paketList } from "@/lib/pricing";
+import { getHargaUtama } from "@/lib/utils";
 
 export default function Home() {
   return (
@@ -58,7 +15,7 @@ export default function Home() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {paketList.map((p, i) => (
             <motion.article
-              key={p.slug}
+              key={p.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.15, duration: 0.4, ease: "easeOut" }}
@@ -80,30 +37,26 @@ export default function Home() {
                 />
               )}
               <h3 className="text-lg font-semibold">{p.nama}</h3>
-              <p className="text-sm mt-1">Jadwal: {p.jadwal.join(", ")}</p>
+              <p className="text-sm mt-1">Durasi: {p.durasi}</p>
               <p className="text-sm mt-1">
-                Hotel: {p.hotMakkah} (Makkah) • {p.hotMadinah} (Madinah)
+                Maskapai:{" "}
+                {Array.isArray(p.maskapai) ? p.maskapai.join(", ") : p.maskapai}
               </p>
-              <p className="text-sm mt-1">Maskapai: {p.airlines.join(", ")}</p>
-              <p className="text-sm mt-1">Bandara: {p.bandara}</p>
+              <p className="text-sm mt-1">
+                Tanggal:{" "}
+                {Array.isArray(p.tanggal) ? p.tanggal.join(", ") : p.tanggal}
+              </p>
               <p className="text-base font-medium mt-2">
-                {formatIDR(p.hargaMulai)}
+                Harga mulai {getHargaUtama(p.harga)}
               </p>
 
               <div className="mt-4 flex gap-2">
                 <Link
-                  href={`/paket/${p.slug}`}
+                  href={`/daftar?paket=${p.id}`}
                   className="px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition"
                 >
-                  Lihat Detail
+                  Daftar
                 </Link>
-                <a
-                  href={p.sumber}
-                  target="_blank"
-                  className="px-4 py-2 rounded-xl border hover:bg-muted transition"
-                >
-                  Sumber Resmi
-                </a>
               </div>
             </motion.article>
           ))}

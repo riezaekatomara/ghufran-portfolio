@@ -1,6 +1,23 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+// Ambil harga utama (kalau array ambil yang pertama)
+export function getHargaUtama(harga: string | string[]) {
+  if (Array.isArray(harga)) return harga[0];
+  return harga;
+}
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+// Convert harga string → number (contoh: "23,5 jt" → 23500000)
+export function parseHargaToNumber(harga: string | string[]) {
+  const h = Array.isArray(harga) ? harga[0] : harga;
+  // Ambil hanya angka & koma
+  const match = h.match(/([\d.,]+)/);
+  if (!match) return 0;
+
+  // Convert "23,5" → 23.5
+  const clean = match[1].replace(".", "").replace(",", ".");
+  const num = parseFloat(clean);
+
+  // Kalau ada kata "jt" berarti juta
+  if (/jt/i.test(h)) {
+    return Math.round(num * 1_000_000);
+  }
+  return Math.round(num);
 }
