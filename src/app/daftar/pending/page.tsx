@@ -1,16 +1,16 @@
 import Link from "next/link";
 
-export default function SuccessPage() {
+export default function PendingPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
       <div className="max-w-md w-full bg-card text-card-foreground rounded-2xl shadow-lg p-8 text-center">
-        <h1 className="text-2xl font-bold mb-4 text-green-600">
-          Pendaftaran Berhasil ✅
+        <h1 className="text-2xl font-bold mb-4 text-yellow-600">
+          Pendaftaran Tertunda ⏳
         </h1>
         <p className="mb-6">
-          Terima kasih telah mendaftar. Silakan lanjutkan pembayaran melalui
-          halaman Midtrans yang sudah terbuka. Kami akan segera mengkonfirmasi
-          pendaftaran Anda.
+          Harga paket Anda masih menunggu konfirmasi dari admin. Tim kami akan
+          segera menghubungi Anda melalui WhatsApp atau Email untuk
+          menyelesaikan pembayaran.
         </p>
         <Link
           href="/"

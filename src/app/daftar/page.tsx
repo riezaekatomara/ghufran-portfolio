@@ -1,109 +1,140 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function DaftarPage() {
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const paketBulan = searchParams.get("bulan") || "";
-  const paketSlug = searchParams.get("paket") || "";
-
-  const [nama, setNama] = useState("");
-  const [email, setEmail] = useState("");
-  const [telepon, setTelepon] = useState("");
-  const [jumlah, setJumlah] = useState(1);
-  const [catatan, setCatatan] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
 
-    const res = await fetch("/api/pendaftar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nama,
-        email,
-        telepon,
-        paket_bulan: paketBulan,
-        paket_slug: paketSlug,
-        jumlah,
-        catatan,
-      }),
-    });
+    const form = e.currentTarget;
+    const formData = new FormData(form);
 
-    if (res.ok) {
-      router.push("/daftar/success"); // ✅ redirect ke halaman sukses
-    } else {
-      alert("Gagal menyimpan data. Coba lagi.");
+    const body = {
+      nama: formData.get("nama"),
+      email: formData.get("email"),
+      telepon: formData.get("telepon"),
+      paket_bulan: formData.get("paket_bulan"),
+      paket_slug: formData.get("paket_slug"),
+      jumlah: formData.get("jumlah"),
+      catatan: formData.get("catatan"),
+    };
+
+    try {
+      const res = await fetch("/api/pendaftar", {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (res.ok) {
+        router.push("/daftar/success"); // ✅ redirect
+      } else {
+        setError("Gagal menyimpan data. Coba lagi.");
+      }
+    } catch (err) {
+      console.error("Error submit:", err);
+      setError("Terjadi kesalahan server.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <main className="container mx-auto px-4 py-12">
-      <h1 className="text-2xl font-bold mb-6">Formulir Pendaftaran</h1>
+    <main className="container mx-auto px-4 py-12 max-w-2xl">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6">
+        Formulir Pendaftaran Umroh
+      </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
+      {error && (
+        <div className="mb-4 p-3 rounded bg-red-100 text-red-700">{error}</div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block mb-1 font-medium">Nama Lengkap</label>
+          <label className="block font-medium">Nama Lengkap</label>
           <input
             type="text"
-            value={nama}
-            onChange={(e) => setNama(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2"
+            name="nama"
             required
+            className="w-full p-2 border rounded"
           />
         </div>
 
         <div>
-          <label className="block mb-1 font-medium">Email</label>
+          <label className="block font-medium">Email</label>
           <input
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2"
+            name="email"
             required
+            className="w-full p-2 border rounded"
           />
         </div>
 
         <div>
-          <label className="block mb-1 font-medium">Nomor HP/WA</label>
+          <label className="block font-medium">Nomor HP/WA</label>
           <input
             type="text"
-            value={telepon}
-            onChange={(e) => setTelepon(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2"
+            name="telepon"
             required
+            className="w-full p-2 border rounded"
           />
         </div>
 
         <div>
-          <label className="block mb-1 font-medium">Jumlah Jamaah</label>
+          <label className="block font-medium">Paket Bulan</label>
+          <input
+            type="text"
+            name="paket_bulan"
+            required
+            placeholder="Contoh: September 2025"
+            className="w-full p-2 border rounded"
+          />
+        </div>
+
+        <div>
+          <label className="block font-medium">Paket</label>
+          <input
+            type="text"
+            name="paket_slug"
+            required
+            placeholder="Contoh: hematpol / manis / akhir-tahun"
+            className="w-full p-2 border rounded"
+          />
+        </div>
+
+        <div>
+          <label className="block font-medium">Jumlah Jamaah</label>
           <input
             type="number"
+            name="jumlah"
+            required
             min={1}
-            value={jumlah}
-            onChange={(e) => setJumlah(Number(e.target.value))}
-            className="w-full border rounded-lg px-3 py-2"
+            defaultValue={1}
+            className="w-full p-2 border rounded"
           />
         </div>
 
         <div>
-          <label className="block mb-1 font-medium">Catatan</label>
+          <label className="block font-medium">Catatan Tambahan</label>
           <textarea
-            value={catatan}
-            onChange={(e) => setCatatan(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2"
-            rows={3}
-          />
+            name="catatan"
+            className="w-full p-2 border rounded"
+          ></textarea>
         </div>
 
         <button
           type="submit"
+          disabled={loading}
           className="px-5 py-2 rounded-xl bg-primary text-primary-foreground"
         >
-          Daftar Sekarang
+          {loading ? "Menyimpan..." : "Daftar Sekarang"}
         </button>
       </form>
     </main>
