@@ -16,8 +16,8 @@ export async function POST(req: Request) {
       grossAmount,
     } = body;
 
-    // 1️⃣ Simpan data pendaftar ke Supabase dulu
-    const { data, error } = await supabase
+    // 🔹 1. Simpan data ke Supabase → status pending
+    const { data: pendaftar, error } = await supabase
       .from("pendaftar")
       .insert([
         {
@@ -31,39 +31,58 @@ export async function POST(req: Request) {
           status: "pending",
         },
       ])
-      .select("id") // supaya dapat id auto increment
+      .select()
       .single();
 
-    if (error) {
-      console.error("❌ Gagal insert pendaftar:", error);
+    if (error || !pendaftar) {
+      console.error("❌ Gagal simpan pendaftar:", error);
       return NextResponse.json(
         { status: "error", message: "Gagal simpan data pendaftar" },
         { status: 500 }
       );
     }
 
-    const orderId = data.id; // gunakan id pendaftar sebagai order_id
+    const orderId = pendaftar.id; // ✅ orderId = id dari Supabase
 
-    // 2️⃣ Jika harga 0 atau null → manual (tanpa Midtrans)
+    // 🔹 2. Simpan juga ke Google Sheets (opsional)
+    try {
+      await fetch(process.env.GSHEET_WEBAPP_URL as string, {
+        method: "POST",
+        body: JSON.stringify({
+          orderId,
+          nama,
+          email,
+          grossAmount,
+          paket_bulan,
+          paket_slug,
+          jumlah,
+          createdAt: new Date().toISOString(),
+        }),
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (sheetErr) {
+      console.error("⚠️ Gagal simpan ke Google Sheets:", sheetErr);
+    }
+
+    // 🔹 3. Kalau harga tidak ada → manual follow-up
     if (!grossAmount || grossAmount <= 0) {
       return NextResponse.json({
         status: "manual",
         message: "Harga dinamis, admin akan menghubungi Anda.",
-        orderId,
       });
     }
 
-    // 3️⃣ Setup Midtrans Snap
+    // 🔹 4. Setup Midtrans Snap
     const snap = new midtransClient.Snap({
       isProduction: process.env.MIDTRANS_IS_PRODUCTION === "true",
       serverKey: process.env.MIDTRANS_SERVER_KEY as string,
       clientKey: process.env.MIDTRANS_CLIENT_KEY as string,
     });
 
-    // 4️⃣ Parameter transaksi
+    // 🔹 5. Parameter transaksi Midtrans
     const parameter = {
       transaction_details: {
-        order_id: orderId.toString(), // harus string
+        order_id: orderId.toString(), // ✅ pakai id dari Supabase
         gross_amount: grossAmount,
       },
       customer_details: {
@@ -73,7 +92,7 @@ export async function POST(req: Request) {
       },
     };
 
-    // 5️⃣ Buat transaksi Midtrans
+    // 🔹 6. Buat transaksi Midtrans
     const transaction = await snap.createTransaction(parameter);
 
     return NextResponse.json({
