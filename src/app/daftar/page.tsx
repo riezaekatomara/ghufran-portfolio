@@ -1,87 +1,58 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { paketList } from "@/lib/pricing";
-import { parseHargaToNumber } from "@/lib/utils";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function DaftarPage() {
   const searchParams = useSearchParams();
-  const paketQuery = searchParams.get("paket") || "";
+  const router = useRouter();
 
-  const selectedPaket = paketList.find((p) => p.id === paketQuery) || {
-    nama: "",
-    harga: "0",
-  };
+  const paketBulan = searchParams.get("bulan") || "";
+  const paketSlug = searchParams.get("paket") || "";
 
-  const [values, setValues] = useState({
-    nama: "",
-    email: "",
-    telepon: "",
-    paket: selectedPaket.nama,
-  });
-
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setValues({ ...values, [e.target.name]: e.target.value });
-  };
+  const [nama, setNama] = useState("");
+  const [email, setEmail] = useState("");
+  const [telepon, setTelepon] = useState("");
+  const [jumlah, setJumlah] = useState(1);
+  const [catatan, setCatatan] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
-    try {
-      // ✅ Kirim ke Google Sheets
-      await fetch(process.env.NEXT_PUBLIC_SHEETS_WEBAPP_URL as string, {
-        method: "POST",
-        body: JSON.stringify(values),
-        headers: { "Content-Type": "application/json" },
-      });
+    const res = await fetch("/api/pendaftar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nama,
+        email,
+        telepon,
+        paket_bulan: paketBulan,
+        paket_slug: paketSlug,
+        jumlah,
+        catatan,
+      }),
+    });
 
-      // ✅ Buat transaksi Midtrans
-      const res = await fetch("/api/payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: "ORDER-" + Date.now(),
-          grossAmount: parseHargaToNumber(selectedPaket.harga),
-          customerName: values.nama,
-          customerEmail: values.email,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.redirect_url) {
-        window.location.href = data.redirect_url;
-      } else {
-        alert("Pendaftaran berhasil, tapi tidak ada redirect Midtrans.");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Terjadi kesalahan, coba lagi.");
-    } finally {
-      setLoading(false);
+    if (res.ok) {
+      router.push("/daftar/success"); // ✅ redirect ke halaman sukses
+    } else {
+      alert("Gagal menyimpan data. Coba lagi.");
     }
   };
 
   return (
-    <div className="max-w-lg mx-auto py-10 px-6">
-      <h1 className="text-2xl font-bold mb-6 text-center">
-        Form Pendaftaran Jamaah
-      </h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <main className="container mx-auto px-4 py-12">
+      <h1 className="text-2xl font-bold mb-6">Formulir Pendaftaran</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
         <div>
           <label className="block mb-1 font-medium">Nama Lengkap</label>
           <input
             type="text"
-            name="nama"
-            value={values.nama}
-            onChange={handleChange}
-            required
+            value={nama}
+            onChange={(e) => setNama(e.target.value)}
             className="w-full border rounded-lg px-3 py-2"
+            required
           />
         </div>
 
@@ -89,53 +60,52 @@ export default function DaftarPage() {
           <label className="block mb-1 font-medium">Email</label>
           <input
             type="email"
-            name="email"
-            value={values.email}
-            onChange={handleChange}
-            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full border rounded-lg px-3 py-2"
+            required
           />
         </div>
 
         <div>
-          <label className="block mb-1 font-medium">No. Telepon</label>
-          <input
-            type="tel"
-            name="telepon"
-            value={values.telepon}
-            onChange={handleChange}
-            required
-            className="w-full border rounded-lg px-3 py-2"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Paket yang Dipilih</label>
+          <label className="block mb-1 font-medium">Nomor HP/WA</label>
           <input
             type="text"
-            name="paket"
-            value={values.paket}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-3 py-2 bg-gray-50"
-            readOnly
+            value={telepon}
+            onChange={(e) => setTelepon(e.target.value)}
+            className="w-full border rounded-lg px-3 py-2"
+            required
           />
         </div>
 
-        {parseHargaToNumber(selectedPaket.harga) > 0 && (
-          <p className="text-lg font-semibold text-center">
-            Harga: Rp{" "}
-            {parseHargaToNumber(selectedPaket.harga).toLocaleString("id-ID")}
-          </p>
-        )}
+        <div>
+          <label className="block mb-1 font-medium">Jumlah Jamaah</label>
+          <input
+            type="number"
+            min={1}
+            value={jumlah}
+            onChange={(e) => setJumlah(Number(e.target.value))}
+            className="w-full border rounded-lg px-3 py-2"
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">Catatan</label>
+          <textarea
+            value={catatan}
+            onChange={(e) => setCatatan(e.target.value)}
+            className="w-full border rounded-lg px-3 py-2"
+            rows={3}
+          />
+        </div>
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:opacity-90 transition"
+          className="px-5 py-2 rounded-xl bg-primary text-primary-foreground"
         >
-          {loading ? "Memproses..." : "Daftar & Bayar"}
+          Daftar Sekarang
         </button>
       </form>
-    </div>
+    </main>
   );
 }

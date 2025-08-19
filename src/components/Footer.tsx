@@ -1,72 +1,73 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Footer() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
+    };
+    getUser();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
   return (
-    <footer className="mt-12 border-t border-border bg-background">
-      <div className="container mx-auto px-4 py-10 grid gap-8 md:grid-cols-3">
-        {/* About */}
-        <div>
-          <h4 className="text-lg font-semibold text-primary mb-3">
-            Ghufran Travel
-          </h4>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Travel terpercaya untuk perjalanan umroh dan haji Anda. Memberikan
-            pelayanan terbaik dengan harga bersahabat.
-          </p>
+    <footer className="w-full bg-gray-100 py-6 mt-10">
+      <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
+        {/* Logo */}
+        <div className="font-bold text-lg mb-4 md:mb-0">GhufranTravel</div>
+
+        {/* Menu Footer */}
+        <div className="flex gap-4 mb-4 md:mb-0">
+          <Link href="/" className="hover:underline">
+            Home
+          </Link>
+          <Link href="/#paket" className="hover:underline">
+            Paket
+          </Link>
+          <Link href="/tentang" className="hover:underline">
+            Tentang
+          </Link>
+          <Link href="/kontak" className="hover:underline">
+            Kontak
+          </Link>
         </div>
 
-        {/* Quick Links */}
-        <div>
-          <h4 className="text-lg font-semibold text-primary mb-3">Menu</h4>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link href="/" className="hover:text-primary transition-colors">
-                Home
+        {/* 🔹 Kondisi Login */}
+        <div className="flex gap-3">
+          {!user ? (
+            <>
+              <Link href="/login" className="hover:underline">
+                Login
               </Link>
-            </li>
-            <li>
-              <Link
-                href="/paket"
-                className="hover:text-primary transition-colors"
-              >
-                Paket
+              <Link href="/register" className="hover:underline">
+                Register
               </Link>
-            </li>
-            <li>
-              <Link
-                href="/daftar"
-                className="hover:text-primary transition-colors"
-              >
-                Daftar
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/kontak"
-                className="hover:text-primary transition-colors"
-              >
-                Kontak
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Contact */}
-        <div>
-          <h4 className="text-lg font-semibold text-primary mb-3">Kontak</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>📍 Jakarta, Indonesia</li>
-            <li>📞 +62 812 3456 7890</li>
-            <li>✉️ info@ghufrantravel.com</li>
-          </ul>
+            </>
+          ) : (
+            <Link href="/dashboard" className="hover:underline">
+              Dashboard
+            </Link>
+          )}
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="border-t border-border py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()}{" "}
-        <span className="font-semibold text-primary">Ghufran Travel</span>. All
-        rights reserved.
+      <div className="text-center text-sm text-gray-500 mt-4">
+        © {new Date().getFullYear()} GhufranTravel. All rights reserved.
       </div>
     </footer>
   );

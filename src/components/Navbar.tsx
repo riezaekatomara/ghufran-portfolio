@@ -1,97 +1,82 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
+    };
+    getUser();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
 
   return (
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <nav className="container mx-auto flex items-center justify-between py-4 px-4">
-        {/* Logo */}
-        <Link href="/" className="text-xl font-bold text-primary">
-          Ghufran Travel
+    <nav className="w-full bg-white shadow-md py-4 px-6 flex justify-between items-center">
+      <Link href="/" className="text-xl font-bold">
+        🕋 Ghufran Travel
+      </Link>
+
+      <div className="flex gap-4 items-center">
+        <Link
+          href="/"
+          className={`${
+            pathname === "/" ? "text-blue-600 font-semibold" : "text-gray-700"
+          }`}
+        >
+          Home
+        </Link>
+        <Link
+          href="/daftar"
+          className={`${
+            pathname.startsWith("/daftar")
+              ? "text-blue-600 font-semibold"
+              : "text-gray-700"
+          }`}
+        >
+          Daftar
         </Link>
 
-        {/* Desktop Menu */}
-        <ul className="hidden md:flex gap-6 text-sm font-medium">
-          <li>
-            <Link href="/" className="hover:text-primary transition-colors">
-              Home
-            </Link>
-          </li>
-          <li>
+        {user ? (
+          <>
             <Link
-              href="/paket"
-              className="hover:text-primary transition-colors"
+              href="/dashboard"
+              className={`${
+                pathname.startsWith("/dashboard")
+                  ? "text-blue-600 font-semibold"
+                  : "text-gray-700"
+              }`}
             >
-              Paket
+              Dashboard
             </Link>
-          </li>
-          <li>
-            <Link
-              href="/daftar"
-              className="hover:text-primary transition-colors"
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
             >
-              Daftar
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/kontak"
-              className="hover:text-primary transition-colors"
-            >
-              Kontak
-            </Link>
-          </li>
-        </ul>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={toggleMenu}
-          className="md:hidden p-2 rounded-lg hover:bg-muted transition"
-        >
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-      </nav>
-
-      {/* Mobile Dropdown Menu */}
-      {isOpen && (
-        <div className="md:hidden bg-background border-t border-border px-4 py-4 space-y-3">
+              Logout
+            </button>
+          </>
+        ) : (
           <Link
-            href="/"
-            className="block hover:text-primary transition-colors"
-            onClick={() => setIsOpen(false)}
+            href="/login"
+            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
           >
-            Home
+            Login
           </Link>
-          <Link
-            href="/paket"
-            className="block hover:text-primary transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            Paket
-          </Link>
-          <Link
-            href="/daftar"
-            className="block hover:text-primary transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            Daftar
-          </Link>
-          <Link
-            href="/kontak"
-            className="block hover:text-primary transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            Kontak
-          </Link>
-        </div>
-      )}
-    </header>
+        )}
+      </div>
+    </nav>
   );
 }

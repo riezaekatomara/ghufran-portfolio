@@ -1,39 +1,41 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { paketBulanan, PaketBulanan } from "@/lib/pricing";
+import Image from "next/image";
+import Link from "next/link";
+import { paketBulanan } from "@/lib/pricing";
 
 export default function BulanPage({ params }: { params: { bulan: string } }) {
-  const bulanData: PaketBulanan | undefined = paketBulanan.find(
-    (b) => b.slug === params.bulan
-  );
+  const bulan = paketBulanan.find((b) => b.slug === params.bulan);
 
-  if (!bulanData) return notFound();
+  if (!bulan) return notFound();
 
   return (
     <main className="container mx-auto px-4 py-12">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6">{bulanData.nama}</h1>
+      <h1 className="text-3xl font-bold mb-8">{bulan.nama}</h1>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {bulanData.paket.map((p) => (
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {bulan.paket.map((p) => (
           <div
             key={p.slug}
-            className="rounded-xl border p-4 shadow-sm bg-card hover:shadow-md transition"
+            className="bg-card rounded-xl shadow hover:shadow-lg overflow-hidden transition"
           >
-            <h3 className="text-lg font-semibold">{p.nama}</h3>
-            <p className="text-sm mt-1">Durasi: {p.durasi}</p>
-            <p className="text-sm mt-1">
-              Maskapai:{" "}
-              {Array.isArray(p.maskapai) ? p.maskapai.join(", ") : p.maskapai}
-            </p>
-            <p className="text-sm mt-1">Tanggal: {p.tanggal.join(", ")}</p>
-            <p className="text-sm mt-1">
-              Harga: {Array.isArray(p.harga) ? p.harga.join(" | ") : p.harga}
-            </p>
-
-            <div className="mt-3">
+            <Image
+              src={bulan.gambar}
+              alt={p.nama}
+              width={500}
+              height={300}
+              className="w-full h-48 object-cover"
+            />
+            <div className="p-5 space-y-3">
+              <h2 className="text-lg font-semibold">{p.nama}</h2>
+              <p className="text-sm text-muted-foreground">
+                Durasi: {p.durasi}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Harga: {Array.isArray(p.harga) ? p.harga.join(", ") : p.harga}
+              </p>
               <Link
-                href={`/${bulanData.slug}/${p.slug}`}
-                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:opacity-90 transition"
+                href={`/${bulan.slug}/${p.slug}`}
+                className="inline-block px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90"
               >
                 Lihat Detail
               </Link>
@@ -42,7 +44,7 @@ export default function BulanPage({ params }: { params: { bulan: string } }) {
         ))}
       </div>
 
-      <div className="mt-8">
+      <div className="mt-10">
         <Link href="/" className="text-sm underline">
           ← Kembali ke semua paket
         </Link>
