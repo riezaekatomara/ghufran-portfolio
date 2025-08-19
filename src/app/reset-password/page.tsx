@@ -1,57 +1,79 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function ResetPasswordPage() {
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setMessage(null);
 
-    const { error } = await supabase.auth.updateUser({
-      password,
-    });
+    if (password !== confirm) {
+      setMessage("❌ Password tidak sama");
+      setLoading(false);
+      return;
+    }
 
-    setLoading(false);
+    const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      alert(error.message);
+      setMessage("❌ " + error.message);
     } else {
-      alert("Password berhasil diubah!");
-      router.push("/login");
+      setMessage("✅ Password berhasil direset. Silakan login kembali.");
+      setTimeout(() => router.push("/login"), 2000);
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <main className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
       <form
         onSubmit={handleResetPassword}
-        className="bg-white shadow-md rounded-xl p-6 w-full max-w-md"
+        className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 w-full max-w-md space-y-4"
       >
-        <h1 className="text-2xl font-bold mb-4 text-center">Reset Password</h1>
+        <h1 className="text-2xl font-bold text-center">Reset Password</h1>
 
-        <input
-          type="password"
-          placeholder="Password Baru"
-          className="w-full border p-2 rounded mb-3"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        {message && <p className="text-center text-sm">{message}</p>}
+
+        <div>
+          <label className="block mb-1 font-medium">Password Baru</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full border rounded-lg px-3 py-2"
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">Konfirmasi Password</label>
+          <input
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            required
+            className="w-full border rounded-lg px-3 py-2"
+          />
+        </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary text-primary-foreground py-2 rounded hover:opacity-90"
+          className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
         >
-          {loading ? "Loading..." : "Reset Password"}
+          {loading ? "Menyimpan..." : "Simpan Password Baru"}
         </button>
       </form>
-    </div>
+    </main>
   );
 }

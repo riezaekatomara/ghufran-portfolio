@@ -6,49 +6,60 @@ import { supabase } from "@/lib/supabaseClient";
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setMessage(null);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
     });
 
-    setLoading(false);
-
     if (error) {
-      alert(error.message);
+      setMessage("❌ " + error.message);
     } else {
-      alert("Cek email untuk reset password!");
+      setMessage("✅ Link reset password telah dikirim ke email Anda.");
     }
+    setLoading(false);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <main className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
       <form
-        onSubmit={handleForgotPassword}
-        className="bg-white shadow-md rounded-xl p-6 w-full max-w-md"
+        onSubmit={handleReset}
+        className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 w-full max-w-md space-y-4"
       >
-        <h1 className="text-2xl font-bold mb-4 text-center">Lupa Password</h1>
+        <h1 className="text-2xl font-bold text-center">Lupa Password</h1>
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full border p-2 rounded mb-3"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        {message && <p className="text-center text-sm">{message}</p>}
+
+        <div>
+          <label className="block mb-1 font-medium">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full border rounded-lg px-3 py-2"
+          />
+        </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary text-primary-foreground py-2 rounded hover:opacity-90"
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
         >
-          {loading ? "Loading..." : "Kirim Link Reset"}
+          {loading ? "Mengirim..." : "Kirim Link Reset"}
         </button>
+
+        <p className="text-sm text-center mt-2">
+          <a href="/login" className="text-blue-600 hover:underline">
+            Kembali ke Login
+          </a>
+        </p>
       </form>
-    </div>
+    </main>
   );
 }

@@ -1,21 +1,51 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
-  const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [session, setSession] = useState<any>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
+    supabase.auth.getSession().then(async ({ data }) => {
+      setSession(data.session);
+
+      if (data.session) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", data.session.user.id)
+          .single();
+
+        setRole(profile?.role || "user");
+      }
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        setSession(session);
+
+        if (session) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", session.user.id)
+            .single();
+
+          setRole(profile?.role || "user");
+        } else {
+          setRole(null);
+        }
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
     };
-    getUser();
   }, []);
 
   const handleLogout = async () => {
@@ -24,57 +54,53 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="w-full bg-white shadow-md py-4 px-6 flex justify-between items-center">
+    <nav className="bg-white dark:bg-gray-900 border-b shadow px-6 py-4 flex justify-between items-center">
       <Link href="/" className="text-xl font-bold">
-        🕋 Ghufran Travel
+        Ghufran Travel
       </Link>
 
-      <div className="flex gap-4 items-center">
-        <Link
-          href="/"
-          className={`${
-            pathname === "/" ? "text-blue-600 font-semibold" : "text-gray-700"
-          }`}
-        >
+      <div className="flex items-center gap-4">
+        <Link href="/" className="hover:underline">
           Home
         </Link>
-        <Link
-          href="/daftar"
-          className={`${
-            pathname.startsWith("/daftar")
-              ? "text-blue-600 font-semibold"
-              : "text-gray-700"
-          }`}
-        >
+        <Link href="/daftar" className="hover:underline">
           Daftar
         </Link>
 
-        {user ? (
+        {!session && (
           <>
             <Link
-              href="/dashboard"
-              className={`${
-                pathname.startsWith("/dashboard")
-                  ? "text-blue-600 font-semibold"
-                  : "text-gray-700"
-              }`}
+              href="/login"
+              className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
             >
-              Dashboard
+              Login
             </Link>
+            <Link
+              href="/register"
+              className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+            >
+              Register
+            </Link>
+          </>
+        )}
+
+        {session && (
+          <>
+            {role === "admin" && (
+              <Link
+                href="/admin"
+                className="px-4 py-2 rounded bg-purple-600 text-white hover:bg-purple-700"
+              >
+                Dashboard
+              </Link>
+            )}
             <button
               onClick={handleLogout}
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
             >
               Logout
             </button>
           </>
-        ) : (
-          <Link
-            href="/login"
-            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-          >
-            Login
-          </Link>
         )}
       </div>
     </nav>
