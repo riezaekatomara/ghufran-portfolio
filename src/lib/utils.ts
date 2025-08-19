@@ -1,3 +1,11 @@
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+// Helper untuk gabung className dengan aman (dipakai di UI component)
+export function cn(...inputs: (string | undefined | null | false)[]) {
+  return twMerge(clsx(inputs));
+}
+
 // Ambil harga utama (kalau array ambil yang pertama)
 export function getHargaUtama(harga: string | string[]) {
   if (Array.isArray(harga)) return harga[0];
@@ -12,7 +20,7 @@ export function parseHargaToNumber(harga: string | string[]) {
   if (!match) return 0;
 
   // Convert "23,5" → 23.5
-  const clean = match[1].replace(".", "").replace(",", ".");
+  const clean = match[1].replace(/\./g, "").replace(",", ".");
   const num = parseFloat(clean);
 
   // Kalau ada kata "jt" berarti juta
