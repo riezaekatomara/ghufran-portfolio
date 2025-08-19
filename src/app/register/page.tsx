@@ -14,51 +14,44 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
+    const { error } = await supabase.auth.signUp({ email, password });
     setLoading(false);
 
     if (error) {
-      alert(error.message);
+      alert("Gagal register: " + error.message);
     } else {
-      alert("Registrasi berhasil! Silakan cek email untuk verifikasi.");
+      alert("Berhasil daftar, silakan login.");
       router.push("/login");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen bg-muted">
       <form
         onSubmit={handleRegister}
-        className="bg-white shadow-md rounded-xl p-6 w-full max-w-md"
+        className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm space-y-4"
       >
-        <h1 className="text-2xl font-bold mb-4 text-center">Register</h1>
-
+        <h1 className="text-xl font-bold">Register Admin</h1>
         <input
           type="email"
           placeholder="Email"
-          className="w-full border p-2 rounded mb-3"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="w-full border rounded p-2"
           required
         />
-
         <input
           type="password"
           placeholder="Password"
-          className="w-full border p-2 rounded mb-3"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="w-full border rounded p-2"
           required
         />
-
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary text-primary-foreground py-2 rounded hover:opacity-90"
+          className="w-full bg-primary text-primary-foreground py-2 rounded"
         >
           {loading ? "Loading..." : "Register"}
         </button>
