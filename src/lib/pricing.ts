@@ -6,17 +6,17 @@ export type SubPaket = {
   maskapai: string | string[];
   tanggal: string[];
   landing?: string | string[];
-  gambar?: string; // 🔹 poster khusus subpaket
 };
 
 export type PaketBulanan = {
   slug: string;
   nama: string;
-  gambar: string; // poster umum bulan
+  gambar: string;
   paket: SubPaket[];
 };
 
 export const paketBulanan: PaketBulanan[] = [
+  // 1. September
   {
     slug: "september",
     nama: "Paket Umroh September 2025",
@@ -30,7 +30,6 @@ export const paketBulanan: PaketBulanan[] = [
         maskapai: "Oman Air",
         tanggal: ["04 September 2025"],
         landing: "Madinah",
-        gambar: "/paket/september.jpg", // 🔹 khusus hematpol
       },
       {
         slug: "seru1",
@@ -40,7 +39,6 @@ export const paketBulanan: PaketBulanan[] = [
         maskapai: "Qatar Airways",
         tanggal: ["06 September 2025"],
         landing: "Jeddah",
-        gambar: "/paket/september.jpg",
       },
       {
         slug: "seru2",
@@ -50,10 +48,11 @@ export const paketBulanan: PaketBulanan[] = [
         maskapai: "Qatar Airways",
         tanggal: ["21 September 2025"],
         landing: "Thaif",
-        gambar: "/paket/september.jpg",
       },
     ],
   },
+
+  // 2. Oktober
   {
     slug: "oktober",
     nama: "Paket Umroh Oktober 2025",
@@ -67,7 +66,6 @@ export const paketBulanan: PaketBulanan[] = [
         maskapai: ["Qatar Airways", "Oman Air"],
         tanggal: ["06 Oktober 2025", "23 Oktober 2025"],
         landing: ["Jeddah", "Madinah"],
-        gambar: "/paket/oktober.jpg",
       },
       {
         slug: "tenang",
@@ -77,8 +75,16 @@ export const paketBulanan: PaketBulanan[] = [
         maskapai: ["Qatar Airways", "Oman Air"],
         tanggal: ["17 Oktober 2025", "23 Oktober 2025"],
         landing: ["Jeddah", "Madinah"],
-        gambar: "/paket/oktober.jpg",
       },
+    ],
+  },
+
+  // 3. Oktober Plus Qatar (khusus Umroh Manis)
+  {
+    slug: "oktober-plus-qatar",
+    nama: "Paket Umroh Oktober Plus Qatar",
+    gambar: "/paket/oktober-manis-bonus-berlapis-qatar.jpg",
+    paket: [
       {
         slug: "manis",
         nama: "Umroh Manis Bonus Berlapis plus Qatar",
@@ -87,10 +93,11 @@ export const paketBulanan: PaketBulanan[] = [
         maskapai: "Qatar Airways",
         tanggal: ["09 Oktober 2025"],
         landing: "Jeddah",
-        gambar: "/paket/oktober-manis-bonus-berlapis-qatar.jpg", // 🔹 khusus manis
       },
     ],
   },
+
+  // 4. November
   {
     slug: "november",
     nama: "Paket Umroh November 2025",
@@ -104,7 +111,6 @@ export const paketBulanan: PaketBulanan[] = [
         maskapai: "Qatar Airways",
         tanggal: ["01 November 2025", "23 November 2025"],
         landing: "Jeddah",
-        gambar: "/paket/november.jpg",
       },
       {
         slug: "bahagia",
@@ -114,10 +120,11 @@ export const paketBulanan: PaketBulanan[] = [
         maskapai: "Qatar Airways",
         tanggal: ["01 November 2025", "21 November 2025", "23 November 2025"],
         landing: "Jeddah",
-        gambar: "/paket/november.jpg",
       },
     ],
   },
+
+  // 5. Desember
   {
     slug: "desember",
     nama: "Paket Umroh Desember 2025",
@@ -131,7 +138,6 @@ export const paketBulanan: PaketBulanan[] = [
         maskapai: ["Qatar Airways", "Saudia"],
         tanggal: ["01 Desember 2025", "25 Desember 2025"],
         landing: ["Madinah", "Jeddah"],
-        gambar: "/paket/desember.jpg",
       },
       {
         slug: "asyik",
@@ -141,8 +147,16 @@ export const paketBulanan: PaketBulanan[] = [
         maskapai: ["Qatar Airways", "Saudia"],
         tanggal: ["01 Desember 2025", "25 Desember 2025"],
         landing: ["Madinah", "Jeddah"],
-        gambar: "/paket/desember.jpg",
       },
+    ],
+  },
+
+  // 6. Desember Akhir Tahun
+  {
+    slug: "desember-akhir-tahun",
+    nama: "Paket Umroh Desember Akhir Tahun 2025",
+    gambar: "/paket/desember-akhir-tahun-thaif-al-ula.jpg",
+    paket: [
       {
         slug: "akhir-tahun",
         nama: "Umroh Akhir Tahun + Thaif & Al Ula",
@@ -158,7 +172,6 @@ export const paketBulanan: PaketBulanan[] = [
         maskapai: "Saudia",
         tanggal: ["25 Desember 2025"],
         landing: "Jeddah",
-        gambar: "/paket/desember-akhir-tahun-thaif-al-ula.jpg", // 🔹 khusus akhir tahun
       },
     ],
   },
