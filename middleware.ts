@@ -6,20 +6,30 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req, res });
 
+  // Ambil session
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  const protectedPaths = ["/admin"];
-  const isProtected = protectedPaths.some((path) =>
-    req.nextUrl.pathname.startsWith(path)
-  );
+  const url = req.nextUrl.clone();
 
-  if (isProtected && !session) {
-    const redirectUrl = req.nextUrl.clone();
-    redirectUrl.pathname = "/login";
-    return NextResponse.redirect(redirectUrl);
+  // Redirect ke /login kalau belum login
+  if (!session && url.pathname.startsWith("/dashboard")) {
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Cek role admin untuk halaman /admin
+  if (url.pathname.startsWith("/admin")) {
+    if (!session || session.user.user_metadata.role !== "admin") {
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   return res;
 }
+
+export const config = {
+  matcher: ["/dashboard/:path*", "/admin/:path*"],
+};

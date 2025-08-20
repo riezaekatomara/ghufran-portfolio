@@ -1,99 +1,107 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { createBrowserClient } from "@supabase/ssr";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [nama, setNama] = useState("");
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullname, setFullname] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    setErr(null);
+    setMsg(null);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullname } },
+      });
+      if (error) throw error;
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { nama }, // ini akan masuk ke raw_user_meta_data → trigger isi table profiles
-      },
-    });
-
-    if (error) {
-      setError(error.message);
+      // jika email confirmation ON, user diminta cek email
+      if (data?.user && !data.session) {
+        setMsg("Registrasi berhasil. Cek email kamu untuk verifikasi.");
+        return;
+      }
+      // kalau auto-confirm aktif
+      router.replace("/login");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Registrasi gagal.";
+      setErr(message);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setLoading(false);
-    alert("Registrasi berhasil! Silakan cek email untuk verifikasi.");
-    router.push("/login");
-  };
+  }
 
   return (
-    <main className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
-      <form
-        onSubmit={handleRegister}
-        className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 w-full max-w-md space-y-4"
-      >
-        <h1 className="text-2xl font-bold text-center">Daftar Akun</h1>
-
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-
+    <main className="max-w-md mx-auto px-4 py-10">
+      <h1 className="text-2xl font-bold mb-6">Daftar Akun</h1>
+      {msg && <p className="mb-3 text-green-600">{msg}</p>}
+      {err && <p className="mb-3 text-red-600">{err}</p>}
+      <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="block mb-1 font-medium">Nama Lengkap</label>
+          <label className="block text-sm mb-1">Nama Lengkap</label>
           <input
             type="text"
-            value={nama}
-            onChange={(e) => setNama(e.target.value)}
             required
-            className="w-full border rounded-lg px-3 py-2"
+            value={fullname}
+            onChange={(e) => setFullname(e.target.value)}
+            className="w-full rounded-lg border px-3 py-2"
+            placeholder="Nama lengkap"
           />
         </div>
-
         <div>
-          <label className="block mb-1 font-medium">Email</label>
+          <label className="block text-sm mb-1">Email</label>
           <input
             type="email"
+            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full border rounded-lg px-3 py-2"
+            className="w-full rounded-lg border px-3 py-2"
+            placeholder="email@contoh.com"
           />
         </div>
-
         <div>
-          <label className="block mb-1 font-medium">Password</label>
+          <label className="block text-sm mb-1">Password</label>
           <input
             type="password"
+            required
+            minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full border rounded-lg px-3 py-2"
+            className="w-full rounded-lg border px-3 py-2"
+            placeholder="Minimal 6 karakter"
           />
         </div>
-
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+          className="w-full rounded-lg bg-primary text-primary-foreground px-4 py-2 disabled:opacity-60"
         >
-          {loading ? "Mendaftar..." : "Daftar"}
+          {loading ? "Memproses..." : "Daftar"}
         </button>
-
-        <p className="text-sm text-center mt-2">
-          Sudah punya akun?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
-            Login
-          </a>
-        </p>
       </form>
+
+      <p className="text-sm mt-4">
+        Sudah punya akun?{" "}
+        <Link href="/login" className="underline">
+          Login
+        </Link>
+      </p>
     </main>
   );
 }

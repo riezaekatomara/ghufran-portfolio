@@ -1,64 +1,67 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { createBrowserClient } from "@supabase/ssr";
 
 export default function ForgotPasswordPage() {
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
 
-  const handleReset = async (e: React.FormEvent) => {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    setMessage(null);
+    setErr(null);
+    setMsg(null);
+    try {
+      const redirectUrl = process.env.NEXT_PUBLIC_APP_URL
+        ? `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`
+        : undefined;
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
-    });
-
-    if (error) {
-      setMessage("❌ " + error.message);
-    } else {
-      setMessage("✅ Link reset password telah dikirim ke email Anda.");
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+      if (error) throw error;
+      setMsg("Link reset password sudah dikirim ke email kamu.");
+    } catch (e: unknown) {
+      const message =
+        e instanceof Error ? e.message : "Gagal mengirim email reset.";
+      setErr(message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }
 
   return (
-    <main className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
-      <form
-        onSubmit={handleReset}
-        className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 w-full max-w-md space-y-4"
-      >
-        <h1 className="text-2xl font-bold text-center">Lupa Password</h1>
-
-        {message && <p className="text-center text-sm">{message}</p>}
-
+    <main className="max-w-md mx-auto px-4 py-10">
+      <h1 className="text-2xl font-bold mb-6">Lupa Password</h1>
+      {msg && <p className="mb-3 text-green-600">{msg}</p>}
+      {err && <p className="mb-3 text-red-600">{err}</p>}
+      <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="block mb-1 font-medium">Email</label>
+          <label className="block text-sm mb-1">Email</label>
           <input
             type="email"
+            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full border rounded-lg px-3 py-2"
+            className="w-full rounded-lg border px-3 py-2"
+            placeholder="email@contoh.com"
           />
         </div>
-
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+          className="w-full rounded-lg bg-primary text-primary-foreground px-4 py-2 disabled:opacity-60"
         >
           {loading ? "Mengirim..." : "Kirim Link Reset"}
         </button>
-
-        <p className="text-sm text-center mt-2">
-          <a href="/login" className="text-blue-600 hover:underline">
-            Kembali ke Login
-          </a>
-        </p>
       </form>
     </main>
   );

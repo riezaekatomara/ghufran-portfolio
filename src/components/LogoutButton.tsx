@@ -1,22 +1,21 @@
 "use client";
 
-import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Button } from "@/components/ui/button";
 
 export default function LogoutButton() {
   const router = useRouter();
+  const supabase = createClientComponentClient();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push("/login"); // setelah logout langsung ke login
   };
 
   return (
-    <button
-      onClick={handleLogout}
-      className="px-4 py-2 bg-destructive text-destructive-foreground rounded hover:opacity-80"
-    >
+    <Button variant="destructive" onClick={handleLogout}>
       Logout
-    </button>
+    </Button>
   );
 }
