@@ -60,7 +60,10 @@ export default function PaketDetailPage({
         >
           Daftar Sekarang
         </Link>
-        <Link href={`/${bulan.slug}`} className="px-5 py-2 rounded-xl border">
+        <Link
+          href={`/paket/${bulan.slug}`}
+          className="px-5 py-2 rounded-xl border"
+        >
           Kembali ke {bulan.nama}
         </Link>
       </div>

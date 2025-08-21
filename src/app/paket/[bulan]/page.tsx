@@ -34,7 +34,7 @@ export default function BulanPage({ params }: { params: { bulan: string } }) {
                 Harga: {Array.isArray(p.harga) ? p.harga.join(", ") : p.harga}
               </p>
               <Link
-                href={`/${bulan.slug}/${p.slug}`}
+                href={`/paket/${bulan.slug}/${p.slug}`}
                 className="inline-block px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90"
               >
                 Lihat Detail
@@ -44,7 +44,7 @@ export default function BulanPage({ params }: { params: { bulan: string } }) {
         ))}
       </div>
 
-      <div className="mt-10">
+      <div className="mt-10 flex gap-4">
         <Link href="/" className="text-sm underline">
           ← Kembali ke semua paket
         </Link>

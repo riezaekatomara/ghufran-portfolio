@@ -2,50 +2,90 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
+import { createBrowserClient, type Session } from "@supabase/ssr";
 
 export default function Navbar() {
-  const supabase = createClientComponentClient();
-  const [user, setUser] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const router = useRouter();
 
+  // Init Supabase client
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  // Cek session user
   useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
+
+    return () => {
+      listener?.subscription.unsubscribe();
     };
-    getUser();
-  }, [supabase]);
+  }, []);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.replace("/login");
+  }
 
   return (
-    <nav className="flex justify-between items-center p-4 bg-gray-100 shadow">
+    <nav className="flex items-center justify-between px-6 py-4 shadow-md bg-white">
+      {/* Logo */}
+      <Link href="/" className="text-xl font-bold">
+        GhufranTravel
+      </Link>
+
+      {/* Menu kanan */}
       <div className="flex gap-4">
-        <Link href="/" className="hover:underline">
-          Home
+        <Link href="/daftar" className="hover:text-blue-500">
+          Daftar Paket
         </Link>
-        {user && (
+        <Link href="/testimoni" className="hover:text-blue-500">
+          Testimoni
+        </Link>
+        <Link href="/tracking" className="hover:text-blue-500">
+          Tracking
+        </Link>
+
+        {!session ? (
           <>
-            <Link href="/dashboard" className="hover:underline">
+            <Link
+              href="/login"
+              className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="px-3 py-1 rounded border border-blue-500 text-blue-500 hover:bg-blue-50"
+            >
+              Register
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link
+              href="/dashboard"
+              className="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600"
+            >
               Dashboard
             </Link>
-            {user.user_metadata?.role === "admin" && (
-              <Link href="/admin" className="hover:underline">
-                Admin
-              </Link>
-            )}
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600"
+            >
+              Logout
+            </button>
           </>
-        )}
-      </div>
-      <div>
-        {user ? (
-          <Link href="/logout" className="hover:underline">
-            Logout
-          </Link>
-        ) : (
-          <Link href="/login" className="hover:underline">
-            Login
-          </Link>
         )}
       </div>
     </nav>

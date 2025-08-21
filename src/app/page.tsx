@@ -3,7 +3,7 @@ import Link from "next/link";
 import { paketBulanan } from "@/lib/pricing";
 
 export default function HomePage() {
-  // Ambil hanya 6 bulan utama (sesuai permintaanmu)
+  // Ambil hanya 6 bulan utama
   const bulanUtama = [
     "september",
     "oktober",
@@ -40,7 +40,7 @@ export default function HomePage() {
                 {p.paket.length} pilihan subpaket tersedia
               </p>
               <Link
-                href={`/${p.slug}`}
+                href={`/paket/${p.slug}`}
                 className="inline-block px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90"
               >
                 Lihat Paket
