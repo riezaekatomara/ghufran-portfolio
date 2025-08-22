@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer"; // Pastikan Footer di-import jika ada
 
 export const metadata: Metadata = {
   title: "Ghufran Travel",
@@ -15,15 +16,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
-      <body className="min-h-screen flex flex-col bg-gray-50">
-        {/* Navbar selalu ada */}
+      {/* Menggunakan bg-background dari CSS baru */}
+      <body className="min-h-screen flex flex-col bg-background">
         <Navbar />
-
-        {/* Konten halaman */}
         <main className="flex-1">{children}</main>
-
-        {/* Footer opsional */}
-        <footer className="text-center py-4 border-t bg-white text-sm text-gray-500">
+        {/* Menggunakan komponen Footer jika ada, jika tidak, bisa pakai footer sederhana ini */}
+        <footer className="text-center py-4 border-t bg-card text-sm text-muted-foreground">
           © {new Date().getFullYear()} Ghufran Travel. All rights reserved.
         </footer>
       </body>

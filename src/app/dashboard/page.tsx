@@ -33,24 +33,35 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <main className="max-w-2xl mx-auto px-4 py-10">
-        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+      <main className="container mx-auto max-w-4xl px-4 py-16">
+        <h1 className="text-4xl font-extrabold mb-8 text-gradient-primary">
+          Dashboard Anda
+        </h1>
 
         {user && (
-          <div className="rounded-lg border p-4 mb-6">
-            <p>
-              <span className="font-medium">Email:</span> {user.email}
-            </p>
-            <p>
-              <span className="font-medium">Nama:</span>{" "}
-              {user.user_metadata?.full_name || "-"}
-            </p>
+          <div className="rounded-xl border-gradient-primary bg-card p-8 shadow-lg mb-8 space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Email Terdaftar</p>
+              <p className="text-lg font-semibold">{user.email}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Nama Pengguna</p>
+              <p className="text-lg font-semibold">
+                {user.user_metadata?.full_name || "Belum diatur"}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Terakhir Login</p>
+              <p className="text-lg font-semibold">
+                {new Date(user.last_sign_in_at).toLocaleString("id-ID")}
+              </p>
+            </div>
           </div>
         )}
 
         <button
           onClick={handleLogout}
-          className="rounded-lg bg-red-500 text-white px-4 py-2"
+          className="px-6 py-2 rounded-lg font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors duration-300"
         >
           Logout
         </button>

@@ -3,9 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { paketBulanan } from "@/lib/pricing";
 
-export default function BulanPage({ params }: { params: { bulan: string } }) {
-  const bulan = paketBulanan.find((b) => b.slug === params.bulan);
+export default async function BulanPage({
+  params,
+}: {
+  params: Promise<{ bulan: string }>;
+}) {
+  const { bulan: bulanSlug } = await params;
 
+  const bulan = paketBulanan.find((b) => b.slug === bulanSlug);
   if (!bulan) return notFound();
 
   return (
@@ -35,7 +40,7 @@ export default function BulanPage({ params }: { params: { bulan: string } }) {
               </p>
               <Link
                 href={`/paket/${bulan.slug}/${p.slug}`}
-                className="inline-block px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90"
+                className="inline-block px-5 py-2 rounded-xl bg-black/80 text-white text-sm font-medium hover:opacity-90"
               >
                 Lihat Detail
               </Link>

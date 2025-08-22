@@ -3,15 +3,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { paketBulanan } from "@/lib/pricing";
 
-export default function PaketDetailPage({
+export default async function PaketDetailPage({
   params,
 }: {
-  params: { bulan: string; slug: string };
+  params: Promise<{ bulan: string; slug: string }>;
 }) {
-  const bulan = paketBulanan.find((b) => b.slug === params.bulan);
+  const { bulan: bulanSlug, slug } = await params;
+
+  const bulan = paketBulanan.find((b) => b.slug === bulanSlug);
   if (!bulan) return notFound();
 
-  const paket = bulan.paket.find((p) => p.slug === params.slug);
+  const paket = bulan.paket.find((p) => p.slug === slug);
   if (!paket) return notFound();
 
   return (
@@ -69,7 +71,7 @@ export default function PaketDetailPage({
       </div>
 
       <div className="mt-8">
-        <Link href="/" className="text-sm underline">
+        <Link href="/paket" className="text-sm underline">
           ← Kembali ke semua paket
         </Link>
       </div>
