@@ -22,18 +22,7 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-2">
-            <Link
-              href="/paket"
-              className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-medium shadow-lg shadow-purple-500/20 hover:opacity-90 transition-all hover:-translate-y-1"
-            >
-              Lihat Paket Umroh
-            </Link>
-            <Link
-              href="/daftar"
-              className="px-6 py-3 border-2 border-primary text-primary rounded-xl font-medium hover:bg-primary hover:text-primary-foreground transition-all"
-            >
-              Daftar Sekarang
-            </Link>
+            {/* tombol */}
           </div>
         </div>
 
