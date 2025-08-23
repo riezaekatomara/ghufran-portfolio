@@ -1,12 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function DaftarPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const paketId = searchParams.get("paket_id");
+
+  const [paket, setPaket] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!paketId) return;
+    supabase
+      .from("paket")
+      .select("id, title, bulan, price")
+      .eq("id", paketId)
+      .single()
+      .then(({ data, error }) => {
+        if (!error) setPaket(data);
+      });
+  }, [paketId]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -20,10 +37,9 @@ export default function DaftarPage() {
       nama: formData.get("nama"),
       email: formData.get("email"),
       telepon: formData.get("telepon"),
-      paket_bulan: formData.get("paket_bulan"),
-      paket_slug: formData.get("paket_slug"),
       jumlah: formData.get("jumlah"),
       catatan: formData.get("catatan"),
+      paket_id: paket?.id, // ✅ kirim id, bukan slug
     };
 
     try {
@@ -34,7 +50,7 @@ export default function DaftarPage() {
       });
 
       if (res.ok) {
-        router.push("/daftar/success"); // ✅ redirect
+        router.push("/daftar/success");
       } else {
         setError("Gagal menyimpan data. Coba lagi.");
       }
@@ -51,6 +67,17 @@ export default function DaftarPage() {
       <h1 className="text-2xl md:text-3xl font-bold mb-6">
         Formulir Pendaftaran Umroh
       </h1>
+
+      {paket && (
+        <div className="mb-6 p-4 rounded bg-gray-50 border">
+          <p>
+            <strong>Paket:</strong> {paket.title} ({paket.bulan})
+          </p>
+          <p>
+            <strong>Harga:</strong> Rp {Number(paket.price).toLocaleString()}
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 p-3 rounded bg-red-100 text-red-700">{error}</div>
@@ -83,28 +110,6 @@ export default function DaftarPage() {
             type="text"
             name="telepon"
             required
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        <div>
-          <label className="block font-medium">Paket Bulan</label>
-          <input
-            type="text"
-            name="paket_bulan"
-            required
-            placeholder="Contoh: September 2025"
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        <div>
-          <label className="block font-medium">Paket</label>
-          <input
-            type="text"
-            name="paket_slug"
-            required
-            placeholder="Contoh: hematpol / manis / akhir-tahun"
             className="w-full p-2 border rounded"
           />
         </div>

@@ -2,164 +2,210 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import LogoutButton from "@/components/LogoutButton";
-import { Button } from "@/components/ui/button";
 
 type Pendaftar = {
-  id: number;
+  pendaftar_id: string;
   nama: string;
   email: string;
-  telepon: string;
-  paket_bulan: string;
-  paket_slug: string;
-  jumlah: number;
+  telepon: string | null;
+  jumlah: number | null;
   catatan: string | null;
+  paket_title: string;
+  paket_bulan: string;
   status: string;
-  created_at: string;
+  tgl_daftar: string;
 };
 
 export default function AdminPage() {
-  const [data, setData] = useState<Pendaftar[]>([]);
+  const [pendaftar, setPendaftar] = useState<Pendaftar[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Ambil data dari Supabase
-  const fetchPendaftar = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("pendaftar")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Gagal ambil data:", error);
-    } else {
-      setData(data || []);
-    }
-    setLoading(false);
-  };
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterPaket, setFilterPaket] = useState("all");
 
   useEffect(() => {
     fetchPendaftar();
   }, []);
 
-  // 🔹 Toggle status pending <-> lunas
-  const toggleStatus = async (id: number, current: string) => {
-    const newStatus = current === "lunas" ? "pending" : "lunas";
+  async function fetchPendaftar() {
+    setLoading(true);
+    const { data, error } = await supabase.from("v_pendaftar").select("*");
+
+    if (error) {
+      console.error("Error fetching pendaftar:", error.message);
+    } else {
+      setPendaftar(data as Pendaftar[]);
+    }
+    setLoading(false);
+  }
+
+  async function updateStatus(id: string, newStatus: string) {
     const { error } = await supabase
       .from("pendaftar")
       .update({ status: newStatus })
       .eq("id", id);
 
     if (error) {
-      alert("Gagal update status");
+      console.error("Error updating status:", error.message);
     } else {
       fetchPendaftar();
     }
-  };
+  }
 
-  // 🔹 Hapus pendaftar
-  const deletePendaftar = async (id: number) => {
-    if (!confirm("Yakin ingin menghapus pendaftar ini?")) return;
-
+  async function deletePendaftar(id: string) {
     const { error } = await supabase.from("pendaftar").delete().eq("id", id);
 
     if (error) {
-      alert("Gagal menghapus data");
+      console.error("Error deleting pendaftar:", error.message);
     } else {
       fetchPendaftar();
     }
-  };
+  }
+
+  // Filter data di sisi client
+  const filteredData = pendaftar.filter((row) => {
+    const matchesSearch =
+      row.nama.toLowerCase().includes(search.toLowerCase()) ||
+      row.email.toLowerCase().includes(search.toLowerCase()) ||
+      (row.telepon ?? "").toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus =
+      filterStatus === "all" ? true : row.status === filterStatus;
+
+    const matchesPaket =
+      filterPaket === "all" ? true : row.paket_title === filterPaket;
+
+    return matchesSearch && matchesStatus && matchesPaket;
+  });
+
+  const paketOptions = Array.from(
+    new Set(pendaftar.map((row) => row.paket_title))
+  );
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <div className="max-w-6xl mx-auto px-6 py-10">
-        {/* Header */}
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Dashboard Admin</h1>
-          <LogoutButton />
-        </header>
+    <main className="container mx-auto px-6 py-12">
+      <h1 className="text-2xl font-bold mb-6">Admin - Data Pendaftar</h1>
 
-        {/* Konten */}
-        <section>
-          {loading ? (
-            <p>Sedang memuat data...</p>
-          ) : data.length === 0 ? (
-            <p className="text-muted-foreground">Belum ada pendaftar.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-border text-sm">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="border border-border px-3 py-2">#</th>
-                    <th className="border border-border px-3 py-2">Nama</th>
-                    <th className="border border-border px-3 py-2">Email</th>
-                    <th className="border border-border px-3 py-2">Telepon</th>
-                    <th className="border border-border px-3 py-2">Paket</th>
-                    <th className="border border-border px-3 py-2">Jumlah</th>
-                    <th className="border border-border px-3 py-2">Status</th>
-                    <th className="border border-border px-3 py-2">Tanggal</th>
-                    <th className="border border-border px-3 py-2">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.map((p, idx) => (
-                    <tr key={p.id} className="odd:bg-card even:bg-muted/40">
-                      <td className="border border-border px-3 py-2">
-                        {idx + 1}
-                      </td>
-                      <td className="border border-border px-3 py-2">
-                        {p.nama}
-                      </td>
-                      <td className="border border-border px-3 py-2">
-                        {p.email}
-                      </td>
-                      <td className="border border-border px-3 py-2">
-                        {p.telepon}
-                      </td>
-                      <td className="border border-border px-3 py-2">
-                        {p.paket_bulan} ({p.paket_slug})
-                      </td>
-                      <td className="border border-border px-3 py-2">
-                        {p.jumlah}
-                      </td>
-                      <td className="border border-border px-3 py-2">
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-medium ${
-                            p.status === "lunas"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-yellow-100 text-yellow-700"
-                          }`}
-                        >
-                          {p.status}
-                        </span>
-                      </td>
-                      <td className="border border-border px-3 py-2">
-                        {new Date(p.created_at).toLocaleString("id-ID")}
-                      </td>
-                      <td className="border border-border px-3 py-2 space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => toggleStatus(p.id, p.status)}
-                        >
-                          {p.status === "lunas" ? "Set Pending" : "Set Lunas"}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => deletePendaftar(p.id)}
-                        >
-                          Hapus
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
+      {/* Controls */}
+      <div className="flex flex-wrap items-center gap-4 mb-6">
+        <input
+          type="text"
+          placeholder="Cari nama, email, telepon..."
+          className="border rounded px-3 py-2 flex-1"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <select
+          className="border rounded px-3 py-2"
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+        >
+          <option value="all">Semua Status</option>
+          <option value="pending">Pending</option>
+          <option value="success">Success</option>
+          <option value="failed">Failed</option>
+        </select>
+
+        <select
+          className="border rounded px-3 py-2"
+          value={filterPaket}
+          onChange={(e) => setFilterPaket(e.target.value)}
+        >
+          <option value="all">Semua Paket</option>
+          {paketOptions.map((paket) => (
+            <option key={paket} value={paket}>
+              {paket}
+            </option>
+          ))}
+        </select>
       </div>
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : filteredData.length === 0 ? (
+        <p className="text-gray-500">Tidak ada pendaftar yang cocok.</p>
+      ) : (
+        <div className="overflow-x-auto bg-white rounded-xl shadow">
+          <table className="w-full border-collapse">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3 border">Nama</th>
+                <th className="p-3 border">Email</th>
+                <th className="p-3 border">Telepon</th>
+                <th className="p-3 border">Jumlah</th>
+                <th className="p-3 border">Catatan</th>
+                <th className="p-3 border">Paket</th>
+                <th className="p-3 border">Bulan</th>
+                <th className="p-3 border">Status</th>
+                <th className="p-3 border">Tanggal</th>
+                <th className="p-3 border">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.map((row) => (
+                <tr key={row.pendaftar_id} className="hover:bg-gray-50">
+                  <td className="p-3 border">{row.nama}</td>
+                  <td className="p-3 border">{row.email}</td>
+                  <td className="p-3 border">{row.telepon || "-"}</td>
+                  <td className="p-3 border">{row.jumlah ?? "-"}</td>
+                  <td className="p-3 border">{row.catatan || "-"}</td>
+                  <td className="p-3 border">{row.paket_title}</td>
+                  <td className="p-3 border">{row.paket_bulan}</td>
+                  <td className="p-3 border">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-semibold
+                        ${
+                          row.status === "success"
+                            ? "bg-green-100 text-green-700"
+                            : row.status === "failed"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                    >
+                      {row.status}
+                    </span>
+                  </td>
+                  <td className="p-3 border">
+                    {new Date(row.tgl_daftar).toLocaleDateString("id-ID", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </td>
+                  <td className="p-3 border space-x-2">
+                    {row.status !== "success" && (
+                      <button
+                        onClick={() =>
+                          updateStatus(row.pendaftar_id, "success")
+                        }
+                        className="px-2 py-1 bg-green-500 text-white rounded text-sm"
+                      >
+                        Tandai Lunas
+                      </button>
+                    )}
+                    {row.status !== "failed" && (
+                      <button
+                        onClick={() => updateStatus(row.pendaftar_id, "failed")}
+                        className="px-2 py-1 bg-red-500 text-white rounded text-sm"
+                      >
+                        Tandai Gagal
+                      </button>
+                    )}
+                    <button
+                      onClick={() => deletePendaftar(row.pendaftar_id)}
+                      className="px-2 py-1 bg-gray-300 text-black rounded text-sm"
+                    >
+                      Hapus
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </main>
   );
 }

@@ -1,78 +1,51 @@
+// src/app/paket/[bulan]/[slug]/page.tsx
+import { supabase } from "@/lib/supabaseClient";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
-import { paketBulanan } from "@/lib/pricing";
+import { Button } from "@/components/ui/button";
 
 export default async function PaketDetailPage({
   params,
 }: {
-  params: Promise<{ bulan: string; slug: string }>;
+  params: { bulan: string; slug: string };
 }) {
-  const { bulan: bulanSlug, slug } = await params;
+  const { slug } = params;
 
-  const bulan = paketBulanan.find((b) => b.slug === bulanSlug);
-  if (!bulan) return notFound();
+  const { data: paket, error } = await supabase
+    .from("paket")
+    .select("id, title, description, price, quota, bulan, slug")
+    .eq("slug", slug)
+    .single();
 
-  const paket = bulan.paket.find((p) => p.slug === slug);
-  if (!paket) return notFound();
+  if (error || !paket) return notFound();
 
   return (
     <main className="container mx-auto px-4 py-12">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6">{paket.nama}</h1>
-
-      <Image
-        src={bulan.gambar}
-        alt={paket.nama}
-        width={800}
-        height={400}
-        className="w-full max-h-96 object-cover rounded-xl mb-8"
-      />
+      <h1 className="text-2xl md:text-3xl font-bold mb-6">{paket.title}</h1>
 
       <div className="space-y-3 text-base">
         <p>
-          <strong>Durasi:</strong> {paket.durasi}
+          <strong>Harga:</strong> Rp {Number(paket.price).toLocaleString()}
         </p>
         <p>
-          <strong>Harga:</strong>{" "}
-          {Array.isArray(paket.harga) ? paket.harga.join(", ") : paket.harga}
+          <strong>Kuota:</strong> {paket.quota} jamaah
         </p>
         <p>
-          <strong>Maskapai:</strong>{" "}
-          {Array.isArray(paket.maskapai)
-            ? paket.maskapai.join(", ")
-            : paket.maskapai}
+          <strong>Bulan:</strong> {paket.bulan}
         </p>
-        <p>
-          <strong>Jadwal:</strong> {paket.tanggal.join(", ")}
-        </p>
-        {paket.landing && (
-          <p>
-            <strong>Landing:</strong>{" "}
-            {Array.isArray(paket.landing)
-              ? paket.landing.join(", ")
-              : paket.landing}
-          </p>
+        {paket.description && (
+          <p className="text-gray-700 leading-relaxed">{paket.description}</p>
         )}
       </div>
 
-      <div className="mt-6 flex gap-3">
-        <Link
-          href={`/daftar?bulan=${bulan.slug}&paket=${paket.slug}`}
-          className="px-5 py-2 rounded-xl bg-primary text-primary-foreground"
-        >
-          Daftar Sekarang
+      <div className="mt-8 flex gap-3">
+        <Link href={`/daftar?paket_id=${paket.id}`}>
+          <Button size="lg">Daftar Sekarang</Button>
         </Link>
-        <Link
-          href={`/paket/${bulan.slug}`}
-          className="px-5 py-2 rounded-xl border"
-        >
-          Kembali ke {bulan.nama}
-        </Link>
-      </div>
-
-      <div className="mt-8">
-        <Link href="/paket" className="text-sm underline">
-          ← Kembali ke semua paket
+        <Link href="/paket">
+          <Button variant="outline" size="lg">
+            Kembali ke semua paket
+          </Button>
         </Link>
       </div>
     </main>

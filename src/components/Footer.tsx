@@ -1,95 +1,79 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { type User } from "@supabase/supabase-js";
+import { Facebook, Instagram, Twitter, Mail } from "lucide-react";
 
 export default function Footer() {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-    };
-    getUser();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
-
   return (
-    <footer className="w-full bg-card py-8 mt-20 border-t">
-      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-        {/* Kolom 1: Logo & Copyright */}
+    <footer className="border-t bg-card text-sm text-muted-foreground">
+      <div className="container mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Brand */}
         <div>
-          <h3 className="text-2xl font-bold text-gradient-primary mb-2">
-            GhufranTravel
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Ghufran Travel. All rights reserved.
+          <h2 className="text-lg font-bold text-foreground">Ghufran Travel</h2>
+          <p className="mt-2">
+            Layanan Haji & Umroh terpercaya dengan pengalaman terbaik untuk
+            perjalanan ibadah Anda.
           </p>
         </div>
 
-        {/* Kolom 2: Menu Navigasi */}
+        {/* Quick Links */}
         <div>
-          <h4 className="font-semibold mb-3">Navigasi</h4>
-          <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-primary transition-colors">
-              Home
-            </Link>
-            <Link
-              href="/paket"
-              className="hover:text-primary transition-colors"
-            >
-              Paket Umroh
-            </Link>
-            <Link
-              href="/tentang"
-              className="hover:text-primary transition-colors"
-            >
-              Tentang Kami
-            </Link>
-          </div>
+          <h3 className="font-semibold text-foreground">Menu</h3>
+          <ul className="mt-2 space-y-2">
+            <li>
+              <Link href="/" className="hover:text-primary">
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link href="/paket" className="hover:text-primary">
+                Paket Umroh
+              </Link>
+            </li>
+            <li>
+              <Link href="/tentang" className="hover:text-primary">
+                Tentang Kami
+              </Link>
+            </li>
+            <li>
+              <Link href="/testimoni" className="hover:text-primary">
+                Testimoni
+              </Link>
+            </li>
+            <li>
+              <Link href="/tracking" className="hover:text-primary">
+                Tracking
+              </Link>
+            </li>
+          </ul>
         </div>
 
-        {/* Kolom 3: Akun & Kontak */}
+        {/* Contact & Social */}
         <div>
-          <h4 className="font-semibold mb-3">Akun</h4>
-          <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-            {!user ? (
-              <>
-                <Link
-                  href="/login"
-                  className="hover:text-primary transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/register"
-                  className="hover:text-primary transition-colors"
-                >
-                  Register
-                </Link>
-              </>
-            ) : (
-              <Link
-                href="/dashboard"
-                className="hover:text-primary transition-colors"
-              >
-                Dashboard Saya
-              </Link>
-            )}
+          <h3 className="font-semibold text-foreground">Kontak</h3>
+          <p className="mt-2">Jl. Haji & Umroh No. 123, Jakarta</p>
+          <p className="mt-1">Email: info@ghufrantravel.com</p>
+          <p className="mt-1">Telp: +62 812 3456 7890</p>
+
+          <div className="flex gap-4 mt-4">
+            <Link href="#" aria-label="Facebook">
+              <Facebook className="h-5 w-5 hover:text-primary" />
+            </Link>
+            <Link href="#" aria-label="Instagram">
+              <Instagram className="h-5 w-5 hover:text-primary" />
+            </Link>
+            <Link href="#" aria-label="Twitter">
+              <Twitter className="h-5 w-5 hover:text-primary" />
+            </Link>
+            <Link href="mailto:info@ghufrantravel.com" aria-label="Email">
+              <Mail className="h-5 w-5 hover:text-primary" />
+            </Link>
           </div>
         </div>
+      </div>
+
+      <div className="text-center py-4 border-t text-xs text-muted-foreground">
+        © {new Date().getFullYear()} Ghufran Travel. All rights reserved.
       </div>
     </footer>
   );

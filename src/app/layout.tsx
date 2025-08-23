@@ -2,7 +2,16 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer"; // Pastikan Footer di-import jika ada
+import Footer from "@/components/Footer";
+import { ThemeProvider } from "next-themes";
+import { Plus_Jakarta_Sans } from "next/font/google";
+
+// Setup font
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-jakarta",
+});
 
 export const metadata: Metadata = {
   title: "Ghufran Travel",
@@ -15,15 +24,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id">
-      {/* Menggunakan bg-background dari CSS baru */}
-      <body className="min-h-screen flex flex-col bg-background">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        {/* Menggunakan komponen Footer jika ada, jika tidak, bisa pakai footer sederhana ini */}
-        <footer className="text-center py-4 border-t bg-card text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Ghufran Travel. All rights reserved.
-        </footer>
+    <html lang="id" suppressHydrationWarning className={jakarta.variable}>
+      <body className="min-h-screen flex flex-col bg-background text-foreground font-sans">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );
