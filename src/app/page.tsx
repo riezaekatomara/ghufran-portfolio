@@ -1,94 +1,75 @@
 import Hero from "@/components/Hero";
 import PaketCard from "@/components/PaketCard";
-import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabaseClient";
 
 export default async function HomePage() {
-  // fetch paket
+  // Ambil data paket
   const { data: paketList, error: paketError } = await supabase
     .from("paket")
     .select("id, slug, bulan, title, description, price, quota")
+    .order("created_at", { ascending: false })
     .limit(6);
 
-  // fetch testimoni (ambil 3 terbaru)
+  // Ambil data testimoni
   const { data: testimoniList, error: testimoniError } = await supabase
     .from("testimoni")
-    .select("id, nama, review")
-    .order("id", { ascending: false })
+    .select("id, content, created_at")
+    .order("created_at", { ascending: false })
     .limit(3);
 
   return (
-    <main className="flex flex-col min-h-screen">
-      {/* Hero */}
+    <div className="flex flex-col">
+      {/* Hero Section */}
       <Hero />
 
-      {/* Paket Section */}
-      <section className="container mx-auto px-6 py-12">
-        <h2 className="text-2xl font-bold text-center mb-8">Paket Umroh</h2>
-
-        {paketError && (
-          <p className="text-center text-red-500 mb-6">
-            Gagal memuat paket. Coba refresh.
-          </p>
-        )}
-
-        {paketList && paketList.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paketList.map((p) => (
-              <PaketCard
-                key={p.id}
-                id={p.id}
-                slug={p.slug}
-                bulan={p.bulan}
-                title={p.title}
-                description={p.description}
-                price={p.price}
-                quota={p.quota}
-              />
-            ))}
-          </div>
-        ) : (
-          !paketError && (
-            <p className="text-center text-gray-500">
-              Belum ada paket yang tersedia.
+      <main className="container mx-auto px-6 py-16 space-y-24">
+        {/* Section Paket */}
+        <section>
+          <h2 className="text-center text-2xl font-bold mb-8">
+            Paket Umroh Terbaru
+          </h2>
+          {paketError && (
+            <p className="text-center text-red-500">Gagal memuat paket</p>
+          )}
+          {paketList?.length === 0 ? (
+            <p className="text-center text-muted-foreground">
+              Belum ada paket tersedia
             </p>
-          )
-        )}
-      </section>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-8">
+              {paketList?.map((p) => (
+                <PaketCard key={p.id} {...p} />
+              ))}
+            </div>
+          )}
+        </section>
 
-      {/* Testimoni Section */}
-      <section className="bg-gray-50 py-12">
-        <div className="container mx-auto px-6">
-          <h2 className="text-2xl font-bold text-center mb-8">
+        {/* Section Testimoni */}
+        <section>
+          <h2 className="text-center text-2xl font-bold mb-8">
             Testimoni Jamaah
           </h2>
-
           {testimoniError && (
-            <p className="text-center text-red-500">Gagal memuat testimoni.</p>
+            <p className="text-center text-red-500">Gagal memuat testimoni</p>
           )}
-
-          {testimoniList && testimoniList.length > 0 ? (
-            <div className="grid md:grid-cols-3 gap-6">
-              {testimoniList.map((t) => (
+          {testimoniList?.length === 0 ? (
+            <p className="text-center text-muted-foreground">
+              Belum ada testimoni tersedia
+            </p>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-8">
+              {testimoniList?.map((t) => (
                 <div
                   key={t.id}
-                  className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
+                  className="rounded-xl shadow-md bg-card p-6 space-y-3"
                 >
-                  <p className="text-gray-700 italic mb-4">“{t.review}”</p>
-                  <p className="text-right font-semibold">— {t.nama}</p>
+                  <p className="italic">“{t.content}”</p>
                 </div>
               ))}
             </div>
-          ) : (
-            !testimoniError && (
-              <p className="text-center text-gray-500">Belum ada testimoni.</p>
-            )
           )}
-        </div>
-      </section>
-
-      {/* Footer */}
-      <Footer />
-    </main>
+        </section>
+      </main>
+    </div>
   );
 }

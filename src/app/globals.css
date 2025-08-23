@@ -1,3 +1,5 @@
+/* globals.css */
+
 /* ==========================================================
    Import Google Font Poppins (harus paling atas)
 ========================================================== */
@@ -42,17 +44,18 @@
 :root {
   --radius: 0.75rem;
 
-  --background: oklch(0.99 0.005 240); /* Off-white */
+  --background: oklch(0.99 0.005 240); /* Off-white, sedikit kebiruan */
   --foreground: oklch(0.145 0 0);
 
-  --card: oklch(1 0 0); /* Putih */
+  --card: oklch(1 0 0); /* Putih bersih */
   --card-foreground: oklch(0.145 0 0);
 
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
 
-  --primary: oklch(0.5 0.25 280); /* Ungu */
-  --primary-foreground: oklch(0.99 0.005 240);
+  /* Warna Primer Baru yang Powerful */
+  --primary: oklch(0.5 0.25 280); /* Ungu Terang */
+  --primary-foreground: oklch(0.99 0.005 240); /* Teks putih */
 
   --secondary: oklch(0.97 0.01 240);
   --secondary-foreground: oklch(0.205 0 0);
@@ -67,7 +70,7 @@
 
   --border: oklch(0.92 0.01 240);
   --input: oklch(0.92 0.01 240);
-  --ring: oklch(0.5 0.25 280);
+  --ring: oklch(0.5 0.25 280); /* Ring/outline ungu primer */
 }
 
 /* ==========================================================
@@ -80,57 +83,34 @@
   body {
     @apply bg-background text-foreground;
   }
-
-  h1 {
-    @apply text-4xl md:text-5xl font-extrabold tracking-tight;
-  }
-  h2 {
-    @apply text-3xl md:text-4xl font-bold tracking-tight;
-  }
-  h3 {
-    @apply text-2xl md:text-3xl font-semibold tracking-tight;
-  }
-  h4 {
-    @apply text-xl md:text-2xl font-semibold;
-  }
-  p {
-    @apply text-base leading-relaxed text-muted-foreground;
-  }
-  small {
-    @apply text-sm text-muted-foreground;
-  }
-  a {
-    @apply transition-colors duration-200 hover:text-primary;
-  }
 }
 
 /* ==========================================================
-   Button Utilities
+   Custom Button Utilities (tanpa DaisyUI / config)
 ========================================================== */
-@layer components {
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors duration-200;
-  }
+.btn {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 
+         rounded-lg font-medium text-sm transition-colors 
+         focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+}
 
-  /* Variants */
-  .btn-primary {
-    @apply btn bg-primary text-primary-foreground hover:bg-primary/90;
-  }
-  .btn-outline {
-    @apply btn border border-border text-foreground hover:bg-accent;
-  }
-  .btn-ghost {
-    @apply btn text-foreground hover:bg-accent/50;
-  }
+.btn-primary {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90;
+}
 
-  /* Sizes */
-  .btn-sm {
-    @apply px-3 py-1.5 text-sm;
-  }
-  .btn-md {
-    @apply px-4 py-2 text-base;
-  }
-  .btn-lg {
-    @apply px-6 py-3 text-lg;
-  }
+.btn-secondary {
+  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+}
+
+.btn-outline {
+  @apply border border-input bg-background 
+         hover:bg-accent hover:text-accent-foreground;
+}
+
+.btn-ghost {
+  @apply hover:bg-accent hover:text-accent-foreground;
+}
+
+.btn-link {
+  @apply text-primary underline-offset-4 hover:underline;
 }
