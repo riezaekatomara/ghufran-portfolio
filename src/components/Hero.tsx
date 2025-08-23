@@ -4,12 +4,13 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="relative bg-background w-full flex items-center min-h-[calc(100vh-64px)] overflow-x-hidden">
-      <div className="container mx-auto px-6 grid md:grid-cols-2 items-center gap-12">
+    <section className="relative bg-background w-full flex items-center min-h-[calc(100vh-64px)]">
+      <div className="container mx-auto px-6 grid md:grid-cols-2 items-center gap-8 md:gap-12">
         {/* Kolom Teks */}
         <div className="text-center md:text-left space-y-6">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-snug tracking-tight">
-            <span className="whitespace-nowrap">
+            {/* di mobile boleh wrap, di desktop dipaksa satu baris */}
+            <span className="sm:whitespace-nowrap">
               Umroh Nyaman & <span className="text-primary">Berkesan</span>
             </span>
             <br />
@@ -38,11 +39,11 @@ export default function Hero() {
         </div>
 
         {/* Kolom Gambar */}
-        <div className="flex justify-center md:justify-end items-center w-full">
+        <div className="flex justify-center md:justify-end items-center">
           <img
             src="/hero/hero-umroh.jpg"
             alt="Umroh Ghufran Travel"
-            className="max-h-[320px] sm:max-h-[400px] w-auto object-contain rounded-2xl shadow-2xl"
+            className="h-auto max-h-[320px] sm:max-h-[400px] w-auto object-contain rounded-2xl shadow-2xl"
           />
         </div>
       </div>
