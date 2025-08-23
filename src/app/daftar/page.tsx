@@ -33,30 +33,60 @@ export default function DaftarPage() {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    const body = {
-      nama: formData.get("nama"),
-      email: formData.get("email"),
-      telepon: formData.get("telepon"),
-      jumlah: formData.get("jumlah"),
-      catatan: formData.get("catatan"),
-      paket_id: paket?.id, // ✅ kirim id, bukan slug
-    };
-
     try {
+      // STEP 1: simpan pendaftar dulu
       const res = await fetch("/api/pendaftar", {
         method: "POST",
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          nama: formData.get("nama"),
+          email: formData.get("email"),
+          telepon: formData.get("telepon"),
+          jumlah: formData.get("jumlah"),
+          catatan: formData.get("catatan"),
+          paket_id: paket?.id,
+        }),
         headers: { "Content-Type": "application/json" },
       });
 
-      if (res.ok) {
-        router.push("/daftar/success");
-      } else {
-        setError("Gagal menyimpan data. Coba lagi.");
+      if (!res.ok) {
+        throw new Error("Gagal menyimpan data pendaftar");
       }
-    } catch (err) {
+
+      const pendaftar = await res.json();
+
+      // STEP 2: langsung buat transaksi Midtrans
+      const payRes = await fetch("/api/payment", {
+        method: "POST",
+        body: JSON.stringify({
+          paketId: pendaftar.paket_id,
+          amount: paket.price,
+          quantity: pendaftar.jumlah,
+          itemName: paket.title,
+          customer: {
+            first_name: pendaftar.nama,
+            email: pendaftar.email,
+            phone: pendaftar.telepon,
+          },
+          pendaftarId: pendaftar.id,
+        }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!payRes.ok) {
+        throw new Error("Gagal membuat transaksi Midtrans");
+      }
+
+      const payment = await payRes.json();
+
+      // STEP 3: redirect ke Midtrans Snap
+      if (payment?.redirect_url) {
+        window.location.href = payment.redirect_url;
+      } else {
+        router.push("/daftar/failed");
+      }
+    } catch (err: any) {
       console.error("Error submit:", err);
-      setError("Terjadi kesalahan server.");
+      setError(err.message || "Terjadi kesalahan server.");
     } finally {
       setLoading(false);
     }
@@ -139,7 +169,7 @@ export default function DaftarPage() {
           disabled={loading}
           className="px-5 py-2 rounded-xl bg-primary text-primary-foreground"
         >
-          {loading ? "Menyimpan..." : "Daftar Sekarang"}
+          {loading ? "Menyimpan..." : "Daftar & Bayar"}
         </button>
       </form>
     </main>

@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. cari atau buat user berdasarkan email
+    // cek user
     let { data: user } = await supabase
       .from("users")
       .select("id")
@@ -23,19 +23,11 @@ export async function POST(req: Request) {
     if (!user) {
       const { data: newUser, error: userError } = await supabase
         .from("users")
-        .insert([
-          {
-            name: nama,
-            email,
-            password: "default123", // nanti bisa diganti Supabase Auth
-            role: "user",
-          },
-        ])
+        .insert([{ name: nama, email, password: "default123", role: "user" }])
         .select("id")
         .single();
 
       if (userError || !newUser) {
-        console.error("User insert error:", userError);
         return NextResponse.json(
           { error: "Gagal membuat user" },
           { status: 500 }
@@ -44,51 +36,35 @@ export async function POST(req: Request) {
       user = newUser;
     }
 
-    // 2. insert ke tabel pendaftar
+    // insert pendaftar
     const { data: pendaftar, error: insertError } = await supabase
       .from("pendaftar")
-      .insert([
-        {
-          user_id: user.id,
-          paket_id: paket_id,
-          status: "pending",
-          payment_id: null,
-        },
-      ])
+      .insert([{ user_id: user.id, paket_id, status: "pending" }])
       .select("id")
       .single();
 
     if (insertError || !pendaftar) {
-      console.error("Supabase error:", insertError);
       return NextResponse.json(
         { error: "Gagal menyimpan pendaftar" },
         { status: 500 }
       );
     }
 
-    // 3. insert ke tabel pendaftar_detail
-    const { error: detailError } = await supabase
+    // insert detail
+    await supabase
       .from("pendaftar_detail")
-      .insert([
-        {
-          pendaftar_id: pendaftar.id,
-          telepon,
-          jumlah,
-          catatan,
-        },
-      ]);
+      .insert([{ pendaftar_id: pendaftar.id, telepon, jumlah, catatan }]);
 
-    if (detailError) {
-      console.error("Supabase error (detail):", detailError);
-      return NextResponse.json(
-        { error: "Gagal menyimpan detail pendaftar" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ success: true });
+    // ✅ return data supaya bisa dipakai ke Midtrans
+    return NextResponse.json({
+      id: pendaftar.id,
+      nama,
+      email,
+      telepon,
+      jumlah,
+      paket_id,
+    });
   } catch (err) {
-    console.error("API error:", err);
     return NextResponse.json(
       { error: "Terjadi kesalahan server" },
       { status: 500 }
